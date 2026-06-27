@@ -21,6 +21,19 @@ services:
     volumes:
       - redis_data:/data
 
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${POSTGRES_DB:-orders_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
   orders:
     build:
       context: .
@@ -31,11 +44,18 @@ services:
       NATS_URL: nats://nats:4222
       REDIS_URL: redis://redis:6379
       ORDERS_HTTP_PORT: "3000"
+      DB_HOST: ${DB_HOST:-postgres}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      DB_NAME: ${DB_NAME:-orders_db}
+      DB_SYNC: ${DB_SYNC:-false}
     ports:
       - "3000:3000"
     depends_on:
       - nats
       - redis
+      - postgres
 
   notifications:
     build:
@@ -50,3 +70,4 @@ services:
 
 volumes:
   redis_data:
+  postgres_data:
