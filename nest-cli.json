@@ -9,13 +9,22 @@
     "tsConfigPath": "apps/orders/tsconfig.app.json"
   },
   "projects": {
-    "orders": {
-      "type": "application",
-      "root": "apps/orders",
-      "entryFile": "main",
-      "sourceRoot": "apps/orders/src",
+    "contracts": {
+      "type": "library",
+      "root": "libs/contracts",
+      "entryFile": "index",
+      "sourceRoot": "libs/contracts/src",
       "compilerOptions": {
-        "tsConfigPath": "apps/orders/tsconfig.app.json"
+        "tsConfigPath": "libs/contracts/tsconfig.lib.json"
+      }
+    },
+    "database": {
+      "type": "library",
+      "root": "libs/database",
+      "entryFile": "index",
+      "sourceRoot": "libs/database/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/database/tsconfig.lib.json"
       }
     },
     "notifications": {
@@ -27,13 +36,22 @@
         "tsConfigPath": "apps/notifications/tsconfig.app.json"
       }
     },
-    "contracts": {
-      "type": "library",
-      "root": "libs/contracts",
-      "entryFile": "index",
-      "sourceRoot": "libs/contracts/src",
+    "orders": {
+      "type": "application",
+      "root": "apps/orders",
+      "entryFile": "main",
+      "sourceRoot": "apps/orders/src",
       "compilerOptions": {
-        "tsConfigPath": "libs/contracts/tsconfig.lib.json"
+        "tsConfigPath": "apps/orders/tsconfig.app.json"
+      }
+    },
+    "reservations": {
+      "type": "application",
+      "root": "apps/reservations",
+      "entryFile": "main",
+      "sourceRoot": "apps/reservations/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/reservations/tsconfig.app.json"
       }
     }
   }
