@@ -15,8 +15,6 @@ export class ReservationsController {
   private readonly logger = new Logger(ReservationsController.name);
 
   constructor(private readonly reservationsService: ReservationsService) {}
-
-  // Capa Síncrona (HTTP)
   
   @Post()
   async create(@Body() createReservationDto: CreateReservationDto) {
@@ -28,8 +26,6 @@ export class ReservationsController {
   async findOne(@Param('id') id: string) {
     return this.reservationsService.findOne(id);
   }
-
-  // Capa Asíncrona (NATS)
 
   @EventPattern(RESERVATION_CONFIRMED_EVENT)
   async handleReservationConfirmed(@Payload() data: ReservationConfirmedEvent) {
