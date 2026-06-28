@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { OrderCreatedEvent, NotificationsStatusResponse } from '@app/contracts';
+import { OrderCreatedEvent, NotificationsStatusResponse, NotifyGuestEvent } from '@app/contracts';
 
 @Injectable()
 export class NotificationsService {
@@ -26,5 +26,16 @@ export class NotificationsService {
       sent: entry?.count ?? 0,
       lastSentAt: entry?.last ?? null,
     };
+  }
+
+  handleNotifyGuest(event: NotifyGuestEvent): void {
+    this.logger.log(`Enviando correo de confirmación a ${event.guestEmail} (${event.guestName}) para la reserva ${event.reservationId}...`);
+
+    const prev = this.sentByCustomer.get(event.guestEmail);
+    this.sentByCustomer.set(event.guestEmail, {
+      count: (prev?.count ?? 0) + 1,
+      last: new Date().toISOString(),
+    });
+    this.logger.log(`¡Correo enviado exitosamente a ${event.guestEmail}!`);
   }
 }

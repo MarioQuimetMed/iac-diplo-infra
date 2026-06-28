@@ -4,7 +4,13 @@ import { Repository } from 'typeorm';
 import { ClientProxy } from '@nestjs/microservices';
 import { Reservation, ReservationStatus } from './entities/reservation.entity';
 import { CreateReservationDto } from './dto/create-reservation.dto';
-import { RESERVATION_REQUESTED_EVENT, ReservationRequestedEvent, NATS_SERVICE } from '@app/contracts';
+import { 
+  RESERVATION_REQUESTED_EVENT, 
+  ReservationRequestedEvent, 
+  NATS_SERVICE, 
+  NOTIFY_GUEST_EVENT, 
+  NotifyGuestEvent 
+} from '@app/contracts';
 
 @Injectable()
 export class ReservationsService {
@@ -50,6 +56,17 @@ export class ReservationsService {
     this.logger.log(`Updating status of reservation ${id} to ${status}`);
     const reservation = await this.findOne(id);
     reservation.status = status;
-    return this.reservationRepository.save(reservation);
+    const updated = await this.reservationRepository.save(reservation);
+
+    if (status === ReservationStatus.CONFIRMED) {
+      this.natsClient.emit<any, NotifyGuestEvent>(NOTIFY_GUEST_EVENT, {
+        reservationId: updated.id,
+        guestName: updated.guestName,
+        guestEmail: updated.guestEmail,
+      });
+      this.logger.log(`Emitted ${NOTIFY_GUEST_EVENT} to NATS for reservation ${id}`);
+    }
+
+    return updated;
   }
 }
