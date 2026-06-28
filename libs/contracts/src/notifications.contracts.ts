@@ -9,3 +9,11 @@ export interface NotificationsStatusResponse {
   sent: number;
   lastSentAt: string | null;
 }
+
+export const NOTIFY_GUEST_EVENT = 'notification.send_email';
+
+export interface NotifyGuestEvent {
+  reservationId: string;
+  guestName: string;
+  guestEmail: string;
+}

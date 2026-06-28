@@ -6,6 +6,8 @@ import {
   OrderCreatedEvent,
   NotificationsStatusRequest,
   NotificationsStatusResponse,
+  NOTIFY_GUEST_EVENT,
+  NotifyGuestEvent,
 } from '@app/contracts';
 import { NotificationsService } from './notifications.service';
 
@@ -21,5 +23,10 @@ export class NotificationsController {
   @MessagePattern(NOTIFICATIONS_STATUS_PATTERN)
   status(@Payload() payload: NotificationsStatusRequest): NotificationsStatusResponse {
     return this.notificationsService.getStatus(payload.customer);
+  }
+
+  @EventPattern(NOTIFY_GUEST_EVENT)
+  onNotifyGuest(@Payload() event: NotifyGuestEvent): void {
+    this.notificationsService.handleNotifyGuest(event);
   }
 }
