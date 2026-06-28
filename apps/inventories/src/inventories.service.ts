@@ -24,14 +24,10 @@ export class InventoriesService {
     private readonly natsClient: ClientProxy,
   ) {}
 
-  async seedRooms() {
-    this.logger.log('Seeding rooms...');
-    const room1 = this.roomRepo.create({ roomNumber: '101', type: 'single' });
-    const room2 = this.roomRepo.create({ roomNumber: '102', type: 'double' });
-    const room3 = this.roomRepo.create({ roomNumber: '201', type: 'suite' });
-    
-    await this.roomRepo.save([room1, room2, room3]);
-    return { message: 'Rooms seeded successfully' };
+  async createRoom(createRoomDto: any) {
+    this.logger.log(`Creating room ${createRoomDto.roomNumber}...`);
+    const room = this.roomRepo.create(createRoomDto);
+    return await this.roomRepo.save(room);
   }
 
   async handleReservationRequested(payload: ReservationRequestedEvent) {
