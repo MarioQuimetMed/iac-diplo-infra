@@ -27,6 +27,15 @@
         "tsConfigPath": "libs/database/tsconfig.lib.json"
       }
     },
+    "inventories": {
+      "type": "application",
+      "root": "apps/inventories",
+      "entryFile": "main",
+      "sourceRoot": "apps/inventories/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/inventories/tsconfig.app.json"
+      }
+    },
     "notifications": {
       "type": "application",
       "root": "apps/notifications",

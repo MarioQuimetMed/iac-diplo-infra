@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Logger } from '@nestjs/common';
 import { EventPattern, Payload } from '@nestjs/microservices';
 import { ReservationsService } from './reservations.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
@@ -12,12 +12,13 @@ import {
 
 @Controller('reservations')
 export class ReservationsController {
-  constructor(private readonly reservationsService: ReservationsService) {}
+  private readonly logger = new Logger(ReservationsController.name);
 
-  // Capa Síncrona (HTTP)
+  constructor(private readonly reservationsService: ReservationsService) {}
   
   @Post()
   async create(@Body() createReservationDto: CreateReservationDto) {
+    this.logger.log(`Received POST request to create reservation...`);
     return this.reservationsService.create(createReservationDto);
   }
 
@@ -26,10 +27,9 @@ export class ReservationsController {
     return this.reservationsService.findOne(id);
   }
 
-  // Capa Asíncrona (NATS)
-
   @EventPattern(RESERVATION_CONFIRMED_EVENT)
   async handleReservationConfirmed(@Payload() data: ReservationConfirmedEvent) {
+    this.logger.log(`Received RESERVATION_CONFIRMED_EVENT from NATS for reservation ${data.reservationId}`);
     if (data.reservationId) {
       await this.reservationsService.updateStatus(
         data.reservationId,
@@ -40,6 +40,7 @@ export class ReservationsController {
 
   @EventPattern(ROOM_UNAVAILABLE_EVENT)
   async handleRoomUnavailable(@Payload() data: RoomUnavailableEvent) {
+    this.logger.warn(`Received ROOM_UNAVAILABLE_EVENT from NATS for reservation ${data.reservationId}`);
     if (data.reservationId) {
       await this.reservationsService.updateStatus(
         data.reservationId,

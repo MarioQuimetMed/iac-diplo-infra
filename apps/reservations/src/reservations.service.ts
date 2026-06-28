@@ -1,4 +1,4 @@
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import { Injectable, Inject, NotFoundException, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ClientProxy } from '@nestjs/microservices';
@@ -8,6 +8,8 @@ import { RESERVATION_REQUESTED_EVENT, ReservationRequestedEvent, NATS_SERVICE } 
 
 @Injectable()
 export class ReservationsService {
+  private readonly logger = new Logger(ReservationsService.name);
+
   constructor(
     @InjectRepository(Reservation)
     private readonly reservationRepository: Repository<Reservation>,
@@ -15,12 +17,14 @@ export class ReservationsService {
   ) {}
 
   async create(createReservationDto: CreateReservationDto): Promise<Reservation> {
+    this.logger.log(`Creating reservation for room ${createReservationDto.roomId}...`);
     const reservation = this.reservationRepository.create({
       ...createReservationDto,
       status: ReservationStatus.PENDING,
     });
 
     const savedReservation = await this.reservationRepository.save(reservation);
+    this.logger.log(`Reservation ${savedReservation.id} saved as PENDING. Emitting event to NATS...`);
 
     this.natsClient.emit<any, ReservationRequestedEvent>(RESERVATION_REQUESTED_EVENT, {
       reservationId: savedReservation.id,
@@ -43,6 +47,7 @@ export class ReservationsService {
   }
 
   async updateStatus(id: string, status: ReservationStatus): Promise<Reservation> {
+    this.logger.log(`Updating status of reservation ${id} to ${status}`);
     const reservation = await this.findOne(id);
     reservation.status = status;
     return this.reservationRepository.save(reservation);
