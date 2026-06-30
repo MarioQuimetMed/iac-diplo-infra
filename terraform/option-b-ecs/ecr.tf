@@ -42,3 +42,33 @@ resource "aws_ecr_lifecycle_policy" "notifications" {
   repository = aws_ecr_repository.notifications.name
   policy     = local.ecr_lifecycle_policy
 }
+
+resource "aws_ecr_repository" "inventories" {
+  name                 = "${var.project_name}/inventories"
+  image_tag_mutability = "MUTABLE"
+  force_delete         = true
+
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+}
+
+resource "aws_ecr_repository" "reservations" {
+  name                 = "${var.project_name}/reservations"
+  image_tag_mutability = "MUTABLE"
+  force_delete         = true
+
+  image_scanning_configuration {
+    scan_on_push = true
+  }
+}
+
+resource "aws_ecr_lifecycle_policy" "inventories" {
+  repository = aws_ecr_repository.inventories.name
+  policy     = local.ecr_lifecycle_policy
+}
+
+resource "aws_ecr_lifecycle_policy" "reservations" {
+  repository = aws_ecr_repository.reservations.name
+  policy     = local.ecr_lifecycle_policy
+}

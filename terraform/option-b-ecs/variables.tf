@@ -55,6 +55,18 @@ variable "notifications_desired_count" {
   default     = 1
 }
 
+variable "inventories_desired_count" {
+  description = "Número de tareas Fargate para inventories."
+  type        = number
+  default     = 1
+}
+
+variable "reservations_desired_count" {
+  description = "Número de tareas Fargate para reservations."
+  type        = number
+  default     = 1
+}
+
 variable "task_cpu" {
   description = "CPU por tarea Fargate (256 = 0.25 vCPU)."
   type        = string
