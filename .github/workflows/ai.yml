@@ -40,7 +40,28 @@ jobs:
         with:
           model: opencode-go/deepseek-v4-pro
           pr-number: ${{ github.event.pull_request.number || github.event.issue.number }}
-          user-comment: ${{ github.event.comment.body }}
+          user-comment: |
+            Actuá como reviewer experto de NestJS, Terraform y CI/CD.
+
+            Revisá únicamente los cambios de este Pull Request.
+
+            Buscá:
+            1. Bugs reales o errores lógicos.
+            2. Problemas de seguridad: inyección, secretos, IAM, CORS, permisos excesivos.
+            3. Inconsistencias con el repo: naming, patrones, estructura, convenciones.
+            4. Simplificaciones obvias: duplicación, abstracciones innecesarias, lógica confusa.
+
+            Reglas:
+            - Respondé en español.
+            - Sé conciso.
+            - No des elogios.
+            - No comentes estilo si no afecta mantenibilidad.
+            - No inventes problemas.
+            - Si un hallazgo aplica a un archivo, indicá la ubicación exacta con path y línea.
+            - Si no hay problemas importantes, indicá que el PR puede aprobarse.
+
+            Instrucción adicional del comentario, si existe:
+            ${{ github.event.comment.body }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
