@@ -134,6 +134,11 @@ jobs:
           PROJECT="test-nest"
           for repo in orders notifications inventories reservations; do
             terraform import -input=false \
+              -var="image_tag=${{ github.sha }}" \
+              -var="aws_region=${{ vars.AWS_REGION }}" \
+              -var="db_user=${{ secrets.DB_USER }}" \
+              -var="db_password=${{ secrets.DB_PASSWORD }}" \
+              -var="db_name=${{ secrets.DB_NAME }}" \
               "aws_ecr_repository.${repo}" "${PROJECT}/${repo}" 2>/dev/null || true
           done
 
@@ -146,6 +151,11 @@ jobs:
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: |
           terraform apply -auto-approve -input=false \
+            -var="image_tag=${{ github.sha }}" \
+            -var="aws_region=${{ vars.AWS_REGION }}" \
+            -var="db_user=${{ secrets.DB_USER }}" \
+            -var="db_password=${{ secrets.DB_PASSWORD }}" \
+            -var="db_name=${{ secrets.DB_NAME }}" \
             -target=aws_ecr_repository.orders \
             -target=aws_ecr_repository.notifications \
             -target=aws_ecr_repository.inventories \
