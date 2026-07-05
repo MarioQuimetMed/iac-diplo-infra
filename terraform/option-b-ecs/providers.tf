@@ -1,12 +1,4 @@
 terraform {
-  backend "s3" {
-    bucket         = "${var.project_name}-tfstate-286273776844"
-    key            = "option-b-ecs/terraform.tfstate"
-    region         = "us-east-1"
-    encrypt        = true
-    dynamodb_table = "test-nest-tf-lock"
-  }
-
   required_version = ">= 1.6.0"
 
   required_providers {

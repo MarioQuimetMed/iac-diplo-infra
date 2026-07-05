@@ -93,6 +93,24 @@ resource "aws_vpc_security_group_ingress_rule" "nats_from_notifications" {
   description                  = "NATS desde notifications"
 }
 
+resource "aws_vpc_security_group_ingress_rule" "nats_from_inventories" {
+  security_group_id            = aws_security_group.nats.id
+  referenced_security_group_id = aws_security_group.inventories.id
+  ip_protocol                  = "tcp"
+  from_port                    = 4222
+  to_port                      = 4222
+  description                  = "NATS desde inventories"
+}
+
+resource "aws_vpc_security_group_ingress_rule" "nats_from_reservations" {
+  security_group_id            = aws_security_group.nats.id
+  referenced_security_group_id = aws_security_group.reservations.id
+  ip_protocol                  = "tcp"
+  from_port                    = 4222
+  to_port                      = 4222
+  description                  = "NATS desde reservations"
+}
+
 resource "aws_security_group" "redis" {
   name        = "${var.project_name}-redis-sg"
   description = "ElastiCache Redis: ingreso solo desde orders"
