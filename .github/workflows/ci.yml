@@ -101,24 +101,16 @@ jobs:
       # 3. CVEs en filesystem + Dockerfiles.
       #    Trivy busca librerías con vulnerabilidades conocidas (CVE)
       #    en el código y en las imágenes base de los Dockerfiles.
+
+      - name: Install Trivy
+        uses: aquasecurity/setup-trivy@e07451d2e059ed86c2870430ea286b3a9e0bf241
+
       - name: Trivy — scan filesystem
-        uses: aquasecurity/trivy-action@v0.28.0
-        with:
-          scan-type: fs
-          scan-ref: .
-          severity: CRITICAL,HIGH
-          exit-code: '0'           # didáctico: no bloquea
-          format: table
+        run: trivy fs --severity CRITICAL,HIGH --format table .
+        continue-on-error: true
 
       # 4. Misconfiguraciones en Terraform (IaC security).
       #    Trivy config scan reemplaza a tfsec (deprecado).
-      #    Dete
-      #    IAM roles demasiado percta: security groups abiertos, buckets sin encryption,misivos, etc.
       - name: Trivy — scan Terraform misconfigs
-        uses: aquasecurity/trivy-action@v0.28.0
-        with:
-          scan-type: config
-          scan-ref: terraform/option-b-ecs
-          severity: CRITICAL,HIGH
-          exit-code: '0'           # didáctico: no bloquea
-          format: table
+        run: trivy config --severity CRITICAL,HIGH --format table terraform/option-b-ecs
+        continue-on-error: true
