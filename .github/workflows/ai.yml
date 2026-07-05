@@ -38,7 +38,7 @@ jobs:
       - name: AI Code Review (OpenCode Go)
         uses: Barmore-Genc/opencode-pr-reviewer@v1
         with:
-          model: opencode-go/kimi-k2.7-code
+          model: kimi-k2.7-code
           pr-number: ${{ github.event.pull_request.number || github.event.issue.number }}
           user-comment: ${{ github.event.comment.body }}
         env:
