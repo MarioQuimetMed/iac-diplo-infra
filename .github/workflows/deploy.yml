@@ -112,6 +112,7 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.9.8
+          terraform_wrapper: false
 
       - name: Terraform init
         working-directory: ${{ env.TF_WORKING_DIR }}
@@ -139,7 +140,7 @@ jobs:
               -var="db_user=${{ secrets.DB_USER }}" \
               -var="db_password=${{ secrets.DB_PASSWORD }}" \
               -var="db_name=${{ secrets.DB_NAME }}" \
-              "aws_ecr_repository.${repo}" "${PROJECT}/${repo}" 2>/dev/null || true
+              "aws_ecr_repository.${repo}" "${PROJECT}/${repo}" || true
           done
 
       # -------------------------------------------------------------
