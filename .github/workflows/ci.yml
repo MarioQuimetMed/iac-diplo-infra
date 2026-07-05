@@ -111,10 +111,14 @@ jobs:
           format: table
 
       # 4. Misconfiguraciones en Terraform (IaC security).
-      #    Detecta cosas como: security groups abiertos al mundo,
-      #    buckets S3 sin encryption, IAM roles demasiado permisivos.
-      - name: tfsec — scan Terraform
-        uses: aquasecurity/tfsec-action@v1.0.3
+      #    Trivy config scan reemplaza a tfsec (deprecado).
+      #    Dete
+      #    IAM roles demasiado percta: security groups abiertos, buckets sin encryption,misivos, etc.
+      - name: Trivy — scan Terraform misconfigs
+        uses: aquasecurity/trivy-action@v0.28.0
         with:
-          working_directory: terraform/option-b-ecs
-          soft_fail: true          # didáctico: reporta sin romper el CI
+          scan-type: config
+          scan-ref: terraform/option-b-ecs
+          severity: CRITICAL,HIGH
+          exit-code: '0'           # didáctico: no bloquea
+          format: table
