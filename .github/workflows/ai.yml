@@ -1,0 +1,46 @@
+# AI Code Review con OpenCode Go
+#
+# Qué hace:
+#   Cuando se abre o actualiza un Pull Request, OpenCode Go
+#   lee el diff y deja un review comment con análisis de:
+#     - bugs o errores lógicos
+#     - problemas de seguridad
+#     - oportunidades de simplificación
+#     - inconsistencias con el resto del repo
+#
+# Requisitos (Settings → Secrets and variables → Actions → Secrets):
+#   OPENCODE_API_KEY → tu API key de https://opencode.ai/auth
+#
+# Por qué importa para el módulo:
+#   Es el patrón "AI-augmented CI/CD" que se está volviendo standard.
+#   El reviewer humano sigue siendo el que aprueba, pero la AI levanta
+#   el 80% del trabajo mecánico (typos, edge cases, naming, etc.).
+
+name: AI Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  issue_comment:
+    types: [created]
+
+jobs:
+  ai-review:
+    name: AI reviews this PR
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pull-requests: write
+      issues: write
+
+    steps:
+      - name: AI Code Review (OpenCode Go)
+        uses: Barmore-Genc/opencode-pr-reviewer@v1
+        with:
+          model: opencode-go/kimi-k2.7-code
+          pr-number: ${{ github.event.pull_request.number || github.event.issue.number }}
+          user-comment: ${{ github.event.comment.body }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
