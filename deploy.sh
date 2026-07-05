@@ -36,6 +36,11 @@ die()  { printf "${C_RED}✘ %s${C_RESET}\n" "$1" >&2; exit 1; }
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TF_DIR="$PROJECT_ROOT/terraform/option-b-ecs"
 
+# -------- Servicios a desplegar --------
+# Debe coincidir con los repos definidos en ecr.tf y los servicios en ecs.tf.
+# (NAT se levanta solo con la imagen pública nats:2.10-alpine, no necesita build/push.)
+SERVICES=(orders notifications inventories reservations)
+
 # =========================================================
 # Paso 1 — Pre-flight checks
 # =========================================================
@@ -72,13 +77,16 @@ ok "Infraestructura AWS aprovisionada"
 step "3/6" "Extrayendo outputs de Terraform"
 
 pushd "$TF_DIR" >/dev/null
-ECR_ORDERS_URL="$(terraform output -raw ecr_orders_repository_url)"
-ECR_NOTIFICATIONS_URL="$(terraform output -raw ecr_notifications_repository_url)"
+declare -A ECR_URLS
+for svc in "${SERVICES[@]}"; do
+  ECR_URLS[$svc]="$(terraform output -raw "ecr_${svc}_repository_url")"
+done
 ALB_DNS_NAME="$(terraform output -raw alb_dns_name)"
 CLUSTER_NAME="$(terraform output -raw cluster_name)"
 popd >/dev/null
 
-ECR_REGISTRY="${ECR_ORDERS_URL%/*}"
+# ECR_REGISTRY = todo hasta el primer "/" (ej: "123.dkr.ecr.us-east-1.amazonaws.com")
+ECR_REGISTRY="${ECR_URLS[orders]%%/*}"
 AWS_REGION="$(echo "$ECR_REGISTRY" | awk -F'.' '{print $4}')"
 [[ -n "$AWS_REGION" ]] || AWS_REGION="$(aws configure get region || echo us-east-1)"
 
@@ -103,42 +111,34 @@ step "5/6" "Build y push de imágenes Docker"
 
 cd "$PROJECT_ROOT"
 
-echo "→ Building orders..."
-docker build --platform linux/amd64 -f apps/orders/Dockerfile -t "$ECR_ORDERS_URL:latest" .
-echo "→ Pushing orders..."
-docker push "$ECR_ORDERS_URL:latest"
-ok "orders → $ECR_ORDERS_URL:latest"
-
-echo "→ Building notifications..."
-docker build --platform linux/amd64 -f apps/notifications/Dockerfile -t "$ECR_NOTIFICATIONS_URL:latest" .
-echo "→ Pushing notifications..."
-docker push "$ECR_NOTIFICATIONS_URL:latest"
-ok "notifications → $ECR_NOTIFICATIONS_URL:latest"
+for svc in "${SERVICES[@]}"; do
+  url="${ECR_URLS[$svc]}"
+  echo "→ Building $svc..."
+  docker build --platform linux/amd64 -f "apps/$svc/Dockerfile" -t "$url:latest" .
+  echo "→ Pushing $svc..."
+  docker push "$url:latest"
+  ok "$svc → $url:latest"
+done
 
 # =========================================================
 # Paso 6 — Force new deployment en ECS
 # =========================================================
 step "6/6" "Forzando redeploy de los servicios ECS"
 
-aws ecs update-service \
-  --cluster "$CLUSTER_NAME" \
-  --service orders \
-  --force-new-deployment \
-  --region "$AWS_REGION" >/dev/null
-ok "orders: force-new-deployment lanzado"
-
-aws ecs update-service \
-  --cluster "$CLUSTER_NAME" \
-  --service notifications \
-  --force-new-deployment \
-  --region "$AWS_REGION" >/dev/null
-ok "notifications: force-new-deployment lanzado"
+for svc in "${SERVICES[@]}"; do
+  aws ecs update-service \
+    --cluster "$CLUSTER_NAME" \
+    --service "$svc" \
+    --force-new-deployment \
+    --region "$AWS_REGION" >/dev/null
+  ok "$svc: force-new-deployment lanzado"
+done
 
 echo
 echo "Esperando a que los servicios queden estables (puede tardar 2-5 min)..."
 if aws ecs wait services-stable \
     --cluster "$CLUSTER_NAME" \
-    --services orders notifications \
+    --services "${SERVICES[@]}" \
     --region "$AWS_REGION"; then
   ok "Servicios estables"
 else
@@ -167,6 +167,8 @@ Probar la API:
 Ver logs en vivo:
   aws logs tail /ecs/test-nest/orders --follow --region ${AWS_REGION}
   aws logs tail /ecs/test-nest/notifications --follow --region ${AWS_REGION}
+  aws logs tail /ecs/test-nest/inventories --follow --region ${AWS_REGION}
+  aws logs tail /ecs/test-nest/reservations --follow --region ${AWS_REGION}
   aws logs tail /ecs/test-nest/nats --follow --region ${AWS_REGION}
 
 Para destruir toda la infraestructura:

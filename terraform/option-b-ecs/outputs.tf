@@ -32,3 +32,13 @@ output "redis_endpoint" {
   description = "Host:puerto del nodo ElastiCache Redis."
   value       = "${aws_elasticache_cluster.redis.cache_nodes[0].address}:${aws_elasticache_cluster.redis.cache_nodes[0].port}"
 }
+
+output "ecr_inventories_repository_url" {
+  description = "URL del repo ECR para inventories."
+  value       = aws_ecr_repository.inventories.repository_url
+}
+
+output "ecr_reservations_repository_url" {
+  description = "URL del repo ECR para reservations."
+  value       = aws_ecr_repository.reservations.repository_url
+}

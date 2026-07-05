@@ -20,8 +20,14 @@ locals {
   nats_dns_url = "nats://nats.${aws_service_discovery_private_dns_namespace.main.name}:4222"
   redis_url    = "redis://${aws_elasticache_cluster.redis.cache_nodes[0].address}:${aws_elasticache_cluster.redis.cache_nodes[0].port}"
   
-  # TODO: Al hacer Data & storage cambiar este valor por la referencia real de RDS
-  postgres_url = "postgres://dummy_user:dummy_pass@localhost:5432/db"
+  # endpoint ya incluye :5432, no duplicar el puerto
+  postgres_url = "postgres://${var.db_user}:${var.db_password}@${aws_db_instance.hotel.endpoint}/${var.db_name}"
+
+  DB_HOST     = aws_db_instance.hotel.address
+  DB_PORT     = tostring(aws_db_instance.hotel.port)
+  DB_NAME     = var.db_name
+  DB_USERNAME = var.db_user
+  DB_PASSWORD = var.db_password
 }
 
 resource "aws_ecs_task_definition" "nats" {
@@ -189,12 +195,17 @@ resource "aws_ecs_task_definition" "inventories" {
     environment = [
       { name = "NATS_URL", value = local.nats_dns_url },
       { name = "HTTP_PORT", value = "3000" },
-      { name = "DATABASE_URL", value = local.postgres_url }
+      { name = "DATABASE_URL", value = local.postgres_url },
+      { name = "DB_HOST", value = local.DB_HOST },
+      { name = "DB_PORT", value = local.DB_PORT },
+      { name = "DB_NAME", value = local.DB_NAME },
+      { name = "DB_USERNAME", value = local.DB_USERNAME },
+      { name = "DB_PASSWORD", value = local.DB_PASSWORD },
     ]
     logConfiguration = {
       logDriver = "awslogs"
       options = {
-        awslogs-group         = "/ecs/${var.project_name}/inventories"
+        awslogs-group         = aws_cloudwatch_log_group.inventories.name
         awslogs-region        = var.aws_region
         awslogs-stream-prefix = "inventories"
       }
@@ -220,12 +231,17 @@ resource "aws_ecs_task_definition" "reservations" {
     environment = [
       { name = "NATS_URL", value = local.nats_dns_url },
       { name = "HTTP_PORT", value = "3000" },
-      { name = "DATABASE_URL", value = local.postgres_url }
+      { name = "DATABASE_URL", value = local.postgres_url },
+      { name = "DB_HOST", value = local.DB_HOST },
+      { name = "DB_PORT", value = local.DB_PORT },
+      { name = "DB_NAME", value = local.DB_NAME },
+      { name = "DB_USERNAME", value = local.DB_USERNAME },
+      { name = "DB_PASSWORD", value = local.DB_PASSWORD },
     ]
     logConfiguration = {
       logDriver = "awslogs"
       options = {
-        awslogs-group         = "/ecs/${var.project_name}/reservations"
+        awslogs-group         = aws_cloudwatch_log_group.reservations.name
         awslogs-region        = var.aws_region
         awslogs-stream-prefix = "reservations"
       }
