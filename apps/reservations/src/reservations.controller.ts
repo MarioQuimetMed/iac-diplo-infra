@@ -3,11 +3,11 @@ import { EventPattern, Payload } from '@nestjs/microservices';
 import { ReservationsService } from './reservations.service';
 import { CreateReservationDto } from './dto/create-reservation.dto';
 import { ReservationStatus } from './entities/reservation.entity';
-import { 
-  RESERVATION_CONFIRMED_EVENT, 
-  ReservationConfirmedEvent, 
-  ROOM_UNAVAILABLE_EVENT, 
-  RoomUnavailableEvent 
+import {
+  RESERVATION_CONFIRMED_EVENT,
+  ReservationConfirmedEvent,
+  ROOM_UNAVAILABLE_EVENT,
+  RoomUnavailableEvent,
 } from '@app/contracts';
 
 @Controller('reservations')
@@ -15,21 +15,29 @@ export class ReservationsController {
   private readonly logger = new Logger(ReservationsController.name);
 
   constructor(private readonly reservationsService: ReservationsService) {}
-  
+
   @Post()
-  async create(@Body() createReservationDto: CreateReservationDto) {
+  async create(
+    this: ReservationsController,
+    @Body() createReservationDto: CreateReservationDto,
+  ) {
     this.logger.log(`Received POST request to create reservation...`);
     return this.reservationsService.create(createReservationDto);
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  async findOne(this: ReservationsController, @Param('id') id: string) {
     return this.reservationsService.findOne(id);
   }
 
   @EventPattern(RESERVATION_CONFIRMED_EVENT)
-  async handleReservationConfirmed(@Payload() data: ReservationConfirmedEvent) {
-    this.logger.log(`Received RESERVATION_CONFIRMED_EVENT from NATS for reservation ${data.reservationId}`);
+  async handleReservationConfirmed(
+    this: ReservationsController,
+    @Payload() data: ReservationConfirmedEvent,
+  ) {
+    this.logger.log(
+      `Received RESERVATION_CONFIRMED_EVENT from NATS for reservation ${data.reservationId}`,
+    );
     if (data.reservationId) {
       await this.reservationsService.updateStatus(
         data.reservationId,
@@ -39,8 +47,13 @@ export class ReservationsController {
   }
 
   @EventPattern(ROOM_UNAVAILABLE_EVENT)
-  async handleRoomUnavailable(@Payload() data: RoomUnavailableEvent) {
-    this.logger.warn(`Received ROOM_UNAVAILABLE_EVENT from NATS for reservation ${data.reservationId}`);
+  async handleRoomUnavailable(
+    this: ReservationsController,
+    @Payload() data: RoomUnavailableEvent,
+  ) {
+    this.logger.warn(
+      `Received ROOM_UNAVAILABLE_EVENT from NATS for reservation ${data.reservationId}`,
+    );
     if (data.reservationId) {
       await this.reservationsService.updateStatus(
         data.reservationId,

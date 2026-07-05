@@ -21,7 +21,9 @@ export class NotificationsController {
   }
 
   @MessagePattern(NOTIFICATIONS_STATUS_PATTERN)
-  status(@Payload() payload: NotificationsStatusRequest): NotificationsStatusResponse {
+  status(
+    @Payload() payload: NotificationsStatusRequest,
+  ): NotificationsStatusResponse {
     return this.notificationsService.getStatus(payload.customer);
   }
 

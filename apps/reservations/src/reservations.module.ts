@@ -22,7 +22,9 @@ import { DatabaseModule } from '@app/database';
         useFactory: (configService: ConfigService) => ({
           transport: Transport.NATS,
           options: {
-            servers: [configService.get<string>('NATS_URL') || DEFAULT_NATS_URL],
+            servers: [
+              configService.get<string>('NATS_URL') || DEFAULT_NATS_URL,
+            ],
           },
         }),
         inject: [ConfigService],

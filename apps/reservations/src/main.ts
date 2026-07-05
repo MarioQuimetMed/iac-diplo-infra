@@ -21,9 +21,11 @@ async function bootstrap() {
 
   // 4. Iniciar ambos escuchas
   await app.startAllMicroservices();
-  
+
   const port = process.env.PORT || 3000;
   await app.listen(port);
-  console.log(`Reservations microservice is listening on port ${port} (HTTP) and connected to NATS`);
+  console.log(
+    `Reservations microservice is listening on port ${port} (HTTP) and connected to NATS`,
+  );
 }
-bootstrap();
+void bootstrap();
