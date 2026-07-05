@@ -49,6 +49,9 @@ die()  { printf "${C_RED}ERROR: %s${C_RESET}\n" "$1" >&2; exit 1; }
 PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TF_DIR="$PROJECT_ROOT/terraform/option-b-ecs"
 
+# Debe coincidir con deploy.sh y con los repos en ecr.tf.
+SERVICES=(orders notifications inventories reservations)
+
 step "1/4" "Pre-flight checks"
 
 for bin in terraform aws; do
@@ -98,8 +101,9 @@ empty_ecr_repo() {
   ok "Repo '$repo' vaciado"
 }
 
-empty_ecr_repo "test-nest/orders"
-empty_ecr_repo "test-nest/notifications"
+for svc in "${SERVICES[@]}"; do
+  empty_ecr_repo "test-nest/$svc"
+done
 
 step "3/4" "terraform destroy"
 
@@ -116,7 +120,8 @@ if [[ $KEEP_LOCAL -eq 1 ]]; then
 else
   if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
     ECR_REGISTRY="${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
-    LOCAL_IMAGES="$(docker images --format '{{.Repository}}:{{.Tag}}' | grep -E "(^${ECR_REGISTRY}/test-nest/(orders|notifications))" || true)"
+    SERVICES_PATTERN="$(IFS='|'; echo "${SERVICES[*]}")"
+    LOCAL_IMAGES="$(docker images --format '{{.Repository}}:{{.Tag}}' | grep -E "(^${ECR_REGISTRY}/test-nest/(${SERVICES_PATTERN}))" || true)"
     if [[ -n "$LOCAL_IMAGES" ]]; then
       echo "$LOCAL_IMAGES" | xargs -r docker rmi -f >/dev/null 2>&1 || true
       ok "Imagenes Docker locales borradas"

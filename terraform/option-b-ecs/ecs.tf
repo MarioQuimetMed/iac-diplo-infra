@@ -21,7 +21,7 @@ locals {
   redis_url    = "redis://${aws_elasticache_cluster.redis.cache_nodes[0].address}:${aws_elasticache_cluster.redis.cache_nodes[0].port}"
   
   # TODO: Al hacer Data & storage cambiar este valor por la referencia real de RDS
-  postgres_url = "postgres://dummy_user:dummy_pass@localhost:5432/db"
+  postgres_url = "postgres://${var.db_user}:${var.db_password}@${aws_db_instance.hotel.endpoint}:5432/db"
 }
 
 resource "aws_ecs_task_definition" "nats" {

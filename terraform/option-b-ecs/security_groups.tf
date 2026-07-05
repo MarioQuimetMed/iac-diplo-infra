@@ -109,3 +109,64 @@ resource "aws_vpc_security_group_ingress_rule" "redis_from_orders" {
   to_port                      = 6379
   description                  = "Redis desde orders"
 }
+
+resource "aws_security_group" "inventories" {
+  name        = "${var.project_name}-inventories-sg"
+  description = "inventories: no acepta entrante (conecta a DB y NATS)"
+  vpc_id      = aws_vpc.main.id
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = { Name = "${var.project_name}-inventories-sg" }
+}
+
+resource "aws_security_group" "reservations" {
+  name        = "${var.project_name}-reservations-sg"
+  description = "reservations: HTTP entrante desde el ALB"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    description     = "HTTP desde ALB"
+    from_port       = 3000
+    to_port         = 3000
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb.id]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = { Name = "${var.project_name}-reservations-sg" }
+}
+
+resource "aws_security_group" "rds" {
+  name        = "${var.project_name}-rds-sg"
+  description = "RDS PostgreSQL: 5432 desde la VPC"
+  vpc_id      = aws_vpc.main.id
+
+  ingress {
+    description = "PostgreSQL desde VPC"
+    from_port   = 5432
+    to_port     = 5432
+    protocol    = "tcp"
+    cidr_blocks = [var.vpc_cidr]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  tags = { Name = "${var.project_name}-rds-sg" }
+}

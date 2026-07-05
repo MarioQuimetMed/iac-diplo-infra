@@ -35,3 +35,38 @@ resource "aws_lb_listener" "http" {
     target_group_arn = aws_lb_target_group.reservations.arn
   }
 }
+
+resource "aws_lb_listener_rule" "orders" {
+  listener_arn = aws_lb_listener.http.arn
+  priority     = 100
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.orders.arn
+  }
+
+  condition {
+    path_pattern {
+      values = ["/orders/*"]
+    }
+  }
+}
+
+resource "aws_lb_target_group" "orders" {
+  name        = "${var.project_name}-orders-tg"
+  port        = 3000
+  protocol    = "HTTP"
+  target_type = "ip"
+  vpc_id      = aws_vpc.main.id
+
+  health_check {
+    path                = "/orders/status/healthcheck"
+    healthy_threshold   = 2
+    unhealthy_threshold = 3
+    interval            = 15
+    timeout             = 5
+    matcher             = "200-404"
+  }
+
+  deregistration_delay = 10
+}
