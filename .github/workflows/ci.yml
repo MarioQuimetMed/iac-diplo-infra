@@ -102,7 +102,7 @@ jobs:
       #    Trivy busca librerías con vulnerabilidades conocidas (CVE)
       #    en el código y en las imágenes base de los Dockerfiles.
       - name: Trivy — scan filesystem
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.28.0
         with:
           scan-type: fs
           scan-ref: .

@@ -43,7 +43,10 @@ export class OrdersService implements OnModuleInit {
       createdAt: new Date().toISOString(),
     };
 
-    await this.redis.set(`${ORDER_KEY_PREFIX}${event.orderId}`, JSON.stringify(event));
+    await this.redis.set(
+      `${ORDER_KEY_PREFIX}${event.orderId}`,
+      JSON.stringify(event),
+    );
     this.logger.log(`Guardado en Redis ${event.orderId}`);
 
     this.nats.emit<void, OrderCreatedEvent>(ORDER_CREATED_EVENT, event);
@@ -57,7 +60,9 @@ export class OrdersService implements OnModuleInit {
     return raw ? (JSON.parse(raw) as OrderCreatedEvent) : null;
   }
 
-  async getNotificationsStatus(customer: string): Promise<NotificationsStatusResponse> {
+  async getNotificationsStatus(
+    customer: string,
+  ): Promise<NotificationsStatusResponse> {
     const payload: NotificationsStatusRequest = { customer };
     this.logger.log(`Request ${NOTIFICATIONS_STATUS_PATTERN} (${customer})`);
 

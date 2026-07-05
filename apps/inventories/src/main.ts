@@ -14,9 +14,11 @@ async function bootstrap() {
   });
 
   await app.startAllMicroservices();
-  
-  const port = process.env.PORT || 3001; 
+
+  const port = process.env.PORT || 3001;
   await app.listen(port);
-  console.log(`Inventories microservice is listening on port ${port} (HTTP) and connected to NATS`);
+  console.log(
+    `Inventories microservice is listening on port ${port} (HTTP) and connected to NATS`,
+  );
 }
-bootstrap();
+void bootstrap();
