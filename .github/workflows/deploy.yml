@@ -124,7 +124,21 @@ jobs:
             -backend-config="encrypt=true"
 
       # -------------------------------------------------------------
-      # 2. Apply targeted: SOLO los repos ECR.
+      # 2. Importar repos ECR existentes al state (idempotente).
+      #    Si ya fueron creados manualmente o en un deploy anterior
+      #    fuera de Terraform, los importa sin error.
+      # -------------------------------------------------------------
+      - name: Import existing ECR repos into state
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: |
+          PROJECT="test-nest"
+          for repo in orders notifications inventories reservations; do
+            terraform import -input=false \
+              "aws_ecr_repository.${repo}" "${PROJECT}/${repo}" 2>/dev/null || true
+          done
+
+      # -------------------------------------------------------------
+      # 3. Apply targeted: SOLO los repos ECR.
       #    Necesario para poder pushear imágenes antes de que ECS
       #    intente crearse y falle por imagen inexistente.
       # -------------------------------------------------------------
