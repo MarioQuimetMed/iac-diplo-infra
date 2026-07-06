@@ -60,16 +60,17 @@ jobs:
           claude_args: '--model claude-3-5-haiku-latest'
           prompt: |
             Sos un reviewer experto de NestJS, Terraform y CI/CD.
-            Revisá los cambios de este Pull Request y dejá comentarios
-            inline (no un comentario gigante al final) sobre:
+            Revisá los cambios de este Pull Request y realiza lo siguiente:
 
-              1. Bugs reales o errores lógicos.
-              2. Problemas de seguridad (inyección, secretos, IAM, CORS, etc.).
-              3. Inconsistencias con el resto del repo (naming, patrones).
-              4. Simplificaciones obvias (código duplicado, abstracciones innecesarias).
+            1. Deja un comentario GENERAL en el Pull Request resumiendo los cambios, qué te parecen y si hay algún riesgo potencial. **SIEMPRE debes dejar este comentario general** para confirmar que completaste la revisión.
+
+            2. Adicionalmente, si encuentras errores, deja comentarios INLINE en las líneas de código afectadas sobre:
+               - Bugs reales o errores lógicos.
+               - Problemas de seguridad (inyección, secretos, IAM, CORS, etc.).
+               - Inconsistencias con el resto del repo (naming, patrones).
+               - Simplificaciones obvias.
 
             Reglas:
-              - Sé conciso. Un comentario por hallazgo, sin párrafos.
-              - No comentes cosas obvias ni elogios.
-              - Si no hay nada que decir en un archivo, no comentes nada.
+              - SIEMPRE deja un comentario general en el PR, aunque el código esté perfecto.
+              - Para los comentarios inline, sé conciso. Un comentario por hallazgo, sin párrafos.
               - Respondé en español.
