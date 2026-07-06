@@ -10,4 +10,4 @@ async function bootstrap() {
   Logger.log(`orders HTTP escuchando en http://localhost:${port}`, 'Bootstrap');
 }
 
-bootstrap();
+void bootstrap();

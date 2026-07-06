@@ -5,3 +5,7 @@ aws_region = "us-east-1"
 
 access_key = "AKIA...REEMPLAZAR..."
 secret_key = "...REEMPLAZAR..."
+
+db_password = ".."
+db_user = ".."
+db_name = ".."

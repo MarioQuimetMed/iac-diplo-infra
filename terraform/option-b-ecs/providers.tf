@@ -1,6 +1,14 @@
 terraform {
   required_version = ">= 1.6.0"
 
+  backend "s3" {
+    bucket         = "test-nest-tfstate-286273776844"
+    key            = "option-b-ecs/terraform.tfstate"
+    region         = "us-east-1"
+    dynamodb_table = "test-nest-tfstate-lock"
+    encrypt        = true
+  }
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"

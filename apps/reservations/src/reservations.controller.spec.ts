@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/unbound-method */
 import { Test, TestingModule } from '@nestjs/testing';
 import { ReservationsController } from './reservations.controller';
 import { ReservationsService } from './reservations.service';
@@ -45,8 +46,12 @@ describe('ReservationsController', () => {
         checkInDate: '2026-07-01',
         checkOutDate: '2026-07-05',
       };
-      const expectedResult = { id: 'uuid-1', ...dto, status: ReservationStatus.PENDING };
-      
+      const expectedResult = {
+        id: 'uuid-1',
+        ...dto,
+        status: ReservationStatus.PENDING,
+      };
+
       mockReservationsService.create.mockResolvedValue(expectedResult);
 
       const result = await controller.create(dto);
@@ -59,7 +64,11 @@ describe('ReservationsController', () => {
   describe('findOne', () => {
     it('should return a single reservation by id', async () => {
       const id = 'uuid-1';
-      const expectedResult = { id, roomId: 'room-1', status: ReservationStatus.PENDING };
+      const expectedResult = {
+        id,
+        roomId: 'room-1',
+        status: ReservationStatus.PENDING,
+      };
 
       mockReservationsService.findOne.mockResolvedValue(expectedResult);
 
@@ -76,7 +85,10 @@ describe('ReservationsController', () => {
 
       await controller.handleReservationConfirmed(payload);
 
-      expect(service.updateStatus).toHaveBeenCalledWith(payload.reservationId, ReservationStatus.CONFIRMED);
+      expect(service.updateStatus).toHaveBeenCalledWith(
+        payload.reservationId,
+        ReservationStatus.CONFIRMED,
+      );
     });
   });
 });

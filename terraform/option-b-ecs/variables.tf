@@ -19,6 +19,27 @@ variable "secret_key" {
   default     = null
 }
 
+variable "db_user" {
+  description = "Nombre de usuario para la base de datos."
+  type        = string
+  sensitive   = true
+  default     = null
+}
+
+variable "db_password" {
+  description = "Contraseña para la base de datos."
+  type        = string
+  sensitive   = true
+  default     = null
+}
+
+variable "db_name" {
+  description = "Nombre de la base de datos."
+  type        = string
+  sensitive   = true
+  default     = null
+}
+
 variable "project_name" {
   description = "Prefijo para nombrar todos los recursos."
   type        = string

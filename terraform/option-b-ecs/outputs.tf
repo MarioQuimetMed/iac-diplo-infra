@@ -32,3 +32,28 @@ output "redis_endpoint" {
   description = "Host:puerto del nodo ElastiCache Redis."
   value       = "${aws_elasticache_cluster.redis.cache_nodes[0].address}:${aws_elasticache_cluster.redis.cache_nodes[0].port}"
 }
+
+output "ecr_inventories_repository_url" {
+  description = "URL del repo ECR para inventories."
+  value       = aws_ecr_repository.inventories.repository_url
+}
+
+output "ecr_reservations_repository_url" {
+  description = "URL del repo ECR para reservations."
+  value       = aws_ecr_repository.reservations.repository_url
+}
+
+output "frontend_website_endpoint" {
+  description = "URL pública del S3 Frontend."
+  value       = aws_s3_bucket_website_configuration.frontend.website_endpoint
+}
+
+output "frontend_https_url" {
+  description = "URL HTTPS del Frontend (vía CloudFront)."
+  value       = "https://${aws_cloudfront_distribution.frontend.domain_name}"
+}
+
+output "backend_https_url" {
+  description = "URL HTTPS del Backend API (vía CloudFront)."
+  value       = "https://${aws_cloudfront_distribution.backend.domain_name}"
+}

@@ -1,0 +1,116 @@
+# CI — corre en cada PR y push a main.
+#
+# Tiene 2 jobs corriendo en paralelo:
+#   1. build       → lint + compila + tests
+#   2. security    → escaneo de vulnerabilidades, secretos e IaC
+#
+# Ambos deben pasar antes de mergear a main.
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    name: Lint, build & test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint:check
+
+      - name: Build orders
+        run: npm run build:orders
+
+      - name: Build notifications
+        run: npm run build:notifications
+
+      - name: Build reservations
+        run: npm run build:reservations
+
+      - name: Build inventories
+        run: npm run build:inventories
+
+      - name: Test
+        run: npm test -- --passWithNoTests
+
+  # ---------------------------------------------------------------------------
+  # Job de seguridad — DevSecOps "shift-left": en vez de descubrir problemas
+  # en producción, los encontramos antes de mergear.
+  #
+  # 4 herramientas, cada una mira una capa distinta:
+  #   - Gitleaks  → secretos commiteados (API keys, passwords, tokens)
+  #   - npm audit → vulnerabilidades conocidas en dependencias
+  #   - Trivy     → vulnerabilidades en filesystem + Dockerfiles (CVEs)
+  #   - tfsec     → misconfiguraciones de Terraform (buckets públicos, etc.)
+  # ---------------------------------------------------------------------------
+  security:
+    name: Security scans
+    runs-on: ubuntu-latest
+
+    # Necesario para que algunos scanners (Trivy/tfsec) puedan publicar
+    # findings al "Security" tab de GitHub vía formato SARIF.
+    permissions:
+      contents: read
+      security-events: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          # Gitleaks necesita el historial completo para buscar secretos
+          # en commits anteriores, no solo en el último.
+          fetch-depth: 0
+
+      # 1. Secretos en el repo (claves AWS, tokens, etc.).
+      - name: Gitleaks — scan secrets
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # 2. Vulnerabilidades en dependencias de npm.
+      #    --audit-level=high → solo falla con high/critical; warnings no.
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: npm audit
+        run: npm audit --audit-level=high
+        continue-on-error: true  # didáctico: reportar sin bloquear el demo
+
+      # 3. CVEs en filesystem + Dockerfiles.
+      #    Trivy busca librerías con vulnerabilidades conocidas (CVE)
+      #    en el código y en las imágenes base de los Dockerfiles.
+
+      - name: Install Trivy
+        uses: aquasecurity/setup-trivy@e07451d2e059ed86c2870430ea286b3a9e0bf241
+
+      - name: Trivy — scan filesystem
+        run: trivy fs --severity CRITICAL,HIGH --format table .
+        continue-on-error: true
+
+      # 4. Misconfiguraciones en Terraform (IaC security).
+      #    Trivy config scan reemplaza a tfsec (deprecado).
+      - name: Trivy — scan Terraform misconfigs
+        run: trivy config --severity CRITICAL,HIGH --format table terraform/option-b-ecs
+        continue-on-error: true
