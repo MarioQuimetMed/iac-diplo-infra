@@ -1,19 +1,23 @@
-# AI Code Review con OpenCode Go
+# AI Code Review con Claude — lo más trending en CI/CD 2026.
 #
 # Qué hace:
-#   Cuando se abre o actualiza un Pull Request, OpenCode Go
-#   lee el diff y deja un review comment con análisis de:
+#   Cuando se abre o actualiza un Pull Request, Claude lee el diff y
+#   deja comentarios inline sobre:
 #     - bugs o errores lógicos
 #     - problemas de seguridad
 #     - oportunidades de simplificación
 #     - inconsistencias con el resto del repo
 #
+# También se puede invocar manualmente comentando "@claude <pregunta>"
+# en cualquier PR o issue.
+#
 # Requisitos (Settings → Secrets and variables → Actions → Secrets):
-#   OPENCODE_API_KEY → tu API key de https://opencode.ai/auth
+#   ANTHROPIC_API_KEY  → tu API key de https://console.anthropic.com/
 #
 # Por qué importa para el módulo:
 #   Es el patrón "AI-augmented CI/CD" que se está volviendo standard.
-#   El reviewer humano sigue siendo el que aprueba, pero la AI levanta
+#   Empresas como Vercel, Shopify y Cloudflare lo usan en producción.
+#   El reviewer humano sigue siendo el que aprueba, pero Claude levanta
 #   el 80% del trabajo mecánico (typos, edge cases, naming, etc.).
 
 name: AI Code Review
@@ -23,45 +27,49 @@ on:
     types: [opened, synchronize, reopened]
   issue_comment:
     types: [created]
+  pull_request_review_comment:
+    types: [created]
 
 jobs:
-  ai-review:
-    name: AI reviews this PR
+  claude-review:
+    name: Claude reviews this PR
     runs-on: ubuntu-latest
 
+    # Permisos que la action necesita para:
+    #   - leer el código del PR
+    #   - dejar comentarios y reviews
+    #   - leer el estado de los checks (para entender contexto)
     permissions:
       contents: read
       pull-requests: write
       issues: write
+      id-token: write
 
     steps:
-      - name: AI Code Review (OpenCode Go)
-        uses: Barmore-Genc/opencode-pr-reviewer@v1
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          model: opencode-go/deepseek-v4-pro
-          pr-number: ${{ github.event.pull_request.number || github.event.issue.number }}
-          user-comment: |
-            Actuá como reviewer experto de NestJS, Terraform y CI/CD.
+          fetch-depth: 1
 
-            Revisá únicamente los cambios de este Pull Request.
+      - name: Run Claude Code Review
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          # Modelo: Sonnet 4.6 es la mejor relación costo/calidad para reviews.
+          # Para reviews muy críticos podés cambiar a claude-opus-4-8.
+          claude_args: '--model claude-3-5-haiku-latest'
+          prompt: |
+            Sos un reviewer experto de NestJS, Terraform y CI/CD.
+            Revisá los cambios de este Pull Request y dejá comentarios
+            inline (no un comentario gigante al final) sobre:
 
-            Buscá:
-            1. Bugs reales o errores lógicos.
-            2. Problemas de seguridad: inyección, secretos, IAM, CORS, permisos excesivos.
-            3. Inconsistencias con el repo: naming, patrones, estructura, convenciones.
-            4. Simplificaciones obvias: duplicación, abstracciones innecesarias, lógica confusa.
+              1. Bugs reales o errores lógicos.
+              2. Problemas de seguridad (inyección, secretos, IAM, CORS, etc.).
+              3. Inconsistencias con el resto del repo (naming, patrones).
+              4. Simplificaciones obvias (código duplicado, abstracciones innecesarias).
 
             Reglas:
-            - Respondé en español.
-            - Sé conciso.
-            - No des elogios.
-            - No comentes estilo si no afecta mantenibilidad.
-            - No inventes problemas.
-            - Si un hallazgo aplica a un archivo, indicá la ubicación exacta con path y línea.
-            - Si no hay problemas importantes, indicá que el PR puede aprobarse.
-
-            Instrucción adicional del comentario, si existe:
-            ${{ github.event.comment.body }}
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
+              - Sé conciso. Un comentario por hallazgo, sin párrafos.
+              - No comentes cosas obvias ni elogios.
+              - Si no hay nada que decir en un archivo, no comentes nada.
+              - Respondé en español.
