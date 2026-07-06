@@ -65,13 +65,14 @@ jobs:
             Analiza los cambios del Pull Request actual usando este comando exacto en bash:
             `gh pr diff ${{ github.event.pull_request.number }}`
 
-            ¡MUY IMPORTANTE!: NO utilices la herramienta o skill "review", ya que estamos en CI automatizado. Solo ejecuta el comando `gh` indicado arriba para obtener el código modificado.
+            ¡MUY IMPORTANTE!: NO utilices la herramienta o skill "review", ya que estamos en CI automatizado.
 
-            Realiza lo siguiente en tu respuesta final:
-            1. Un comentario GENERAL (MÁXIMO 2 oraciones) diciendo si todo está bien o qué riesgos hay.
-            2. Si encuentras errores, redacta comentarios INLINE cortos (ej: "archivo.ts línea X: error lógico").
+            Una vez que analices el diff, DEBES PUBLICAR tu revisión directamente en GitHub usando la herramienta Bash.
+            Ejecuta el siguiente comando (reemplaza EL_TEXTO_DE_TU_REVISION por tus comentarios reales):
+            
+            `gh pr comment ${{ github.event.pull_request.number }} --body "EL_TEXTO_DE_TU_REVISION"`
 
             Reglas Críticas:
+              - Tu revisión debe tener MÁXIMO 2 oraciones generales, y si hay errores, enumerarlos brevemente.
               - Sé EXTREMADAMENTE conciso. NO escribas relleno, NO expliques tu razonamiento previo, NO saludes.
-              - Escribe solo la revisión directamente.
               - Respondé en español.
