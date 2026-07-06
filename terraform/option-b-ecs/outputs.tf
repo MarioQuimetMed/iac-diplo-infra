@@ -42,3 +42,8 @@ output "ecr_reservations_repository_url" {
   description = "URL del repo ECR para reservations."
   value       = aws_ecr_repository.reservations.repository_url
 }
+
+output "frontend_website_endpoint" {
+  description = "URL pública del S3 Frontend."
+  value       = aws_s3_bucket_website_configuration.frontend.website_endpoint
+}

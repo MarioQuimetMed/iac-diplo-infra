@@ -29,7 +29,12 @@ name: Deploy to AWS
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+    paths:
+      - 'apps/**'
+      - 'terraform/**'
+      - '.github/workflows/deploy.yml'
   workflow_dispatch:
 
 concurrency:
