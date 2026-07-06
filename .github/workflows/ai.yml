@@ -62,19 +62,15 @@ jobs:
           claude_args: '--model claude-sonnet-4-6 --dangerously-skip-permissions'
           prompt: |
             Sos un reviewer experto de NestJS, Terraform y CI/CD.
-            Por favor analiza los cambios del Pull Request actual. Para ver los cambios, usa la herramienta Bash para ejecutar `git diff origin/main...HEAD` o lee los archivos modificados directamente.
+            Analiza los últimos cambios ejecutando `git diff HEAD~1 HEAD` en bash.
             
-            ¡MUY IMPORTANTE!: NO utilices la herramienta o skill "review" ni intentes usar "gh pr list". Estás en un entorno de Integración Continua sin interacción humana, por lo que esas herramientas interactivas fallarán. Tu objetivo es obtener el diff por tu cuenta y luego generar tu respuesta final aquí.
+            ¡MUY IMPORTANTE!: NO utilices la herramienta o skill "review" ni intentes usar "gh". Estás en CI automatizado.
 
             Realiza lo siguiente en tu respuesta final:
-            1. Un comentario GENERAL resumiendo los cambios (mensaje bien corto y conciso, si no hay nada mal solo di "todo bien"), qué te parecen y si hay algún riesgo potencial. **SIEMPRE debes dejar este comentario general** para confirmar que completaste la revisión.
-            2. Adicionalmente, si encuentras errores, redacta comentarios INLINE en las líneas de código afectadas sobre:
-               - Bugs reales o errores lógicos.
-               - Problemas de seguridad (inyección, secretos, IAM, CORS, etc.).
-               - Inconsistencias con el resto del repo (naming, patrones).
-               - Simplificaciones obvias.
+            1. Un comentario GENERAL (MÁXIMO 2 oraciones) diciendo si todo está bien o qué riesgos hay.
+            2. Si encuentras errores, redacta comentarios INLINE cortos (ej: "archivo.ts línea X: error lógico").
 
-            Reglas:
-              - SIEMPRE deja un comentario general en tu output final, aunque el código esté perfecto.
-              - Para los comentarios inline, sé conciso. Un comentario por hallazgo, sin párrafos.
+            Reglas Críticas:
+              - Sé EXTREMADAMENTE conciso. NO escribas relleno, NO expliques tu razonamiento previo, NO saludes.
+              - Escribe solo la revisión directamente.
               - Respondé en español.
