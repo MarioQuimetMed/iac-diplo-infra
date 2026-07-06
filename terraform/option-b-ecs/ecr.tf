@@ -1,12 +1,3 @@
-resource "aws_ecr_repository" "orders" {
-  name                 = "${var.project_name}/orders"
-  image_tag_mutability = "MUTABLE"
-  force_delete         = true
-
-  image_scanning_configuration {
-    scan_on_push = true
-  }
-}
 
 resource "aws_ecr_repository" "notifications" {
   name                 = "${var.project_name}/notifications"
@@ -33,10 +24,6 @@ locals {
   })
 }
 
-resource "aws_ecr_lifecycle_policy" "orders" {
-  repository = aws_ecr_repository.orders.name
-  policy     = local.ecr_lifecycle_policy
-}
 
 resource "aws_ecr_lifecycle_policy" "notifications" {
   repository = aws_ecr_repository.notifications.name

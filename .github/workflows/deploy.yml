@@ -138,7 +138,7 @@ jobs:
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: |
           PROJECT="test-nest"
-          for repo in orders notifications inventories reservations; do
+          for repo in notifications inventories reservations; do
             terraform import -input=false \
               -var="image_tag=${{ github.sha }}" \
               -var="aws_region=${{ vars.AWS_REGION }}" \
@@ -162,7 +162,7 @@ jobs:
             -var="db_user=${{ secrets.DB_USER }}" \
             -var="db_password=${{ secrets.DB_PASSWORD }}" \
             -var="db_name=${{ secrets.DB_NAME }}" \
-            -target=aws_ecr_repository.orders \
+
             -target=aws_ecr_repository.notifications \
             -target=aws_ecr_repository.inventories \
             -target=aws_ecr_repository.reservations
@@ -171,7 +171,7 @@ jobs:
         id: ecr
         working-directory: ${{ env.TF_WORKING_DIR }}
         run: |
-          echo "orders=$(terraform output -raw ecr_orders_repository_url)" >> "$GITHUB_OUTPUT"
+
           echo "notifications=$(terraform output -raw ecr_notifications_repository_url)" >> "$GITHUB_OUTPUT"
           echo "inventories=$(terraform output -raw ecr_inventories_repository_url)" >> "$GITHUB_OUTPUT"
           echo "reservations=$(terraform output -raw ecr_reservations_repository_url)" >> "$GITHUB_OUTPUT"
@@ -186,18 +186,6 @@ jobs:
       # 3. Build & push con tag = github.sha (commit corto).
       #    También taggeamos 'latest' por conveniencia.
       # -------------------------------------------------------------
-      - name: Build & push orders
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: apps/orders/Dockerfile
-          platforms: linux/amd64
-          push: true
-          tags: |
-            ${{ steps.ecr.outputs.orders }}:${{ github.sha }}
-            ${{ steps.ecr.outputs.orders }}:latest
-          cache-from: type=gha,scope=orders
-          cache-to: type=gha,mode=max,scope=orders
 
       - name: Build & push notifications
         uses: docker/build-push-action@v6
@@ -261,7 +249,7 @@ jobs:
           CLUSTER=$(terraform output -raw cluster_name)
           aws ecs wait services-stable \
             --cluster "$CLUSTER" \
-            --services orders notifications inventories reservations \
+            --services notifications inventories reservations \
             --region "${{ vars.AWS_REGION }}"
 
       - name: Summary

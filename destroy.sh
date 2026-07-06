@@ -50,7 +50,7 @@ PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TF_DIR="$PROJECT_ROOT/terraform/option-b-ecs"
 
 # Debe coincidir con deploy.sh y con los repos en ecr.tf.
-SERVICES=(orders notifications inventories reservations)
+SERVICES=(notifications inventories reservations)
 
 step "1/4" "Pre-flight checks"
 

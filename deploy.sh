@@ -7,7 +7,7 @@
 #   2. terraform init + apply (auto-aprobado) — usa creds de terraform.tfvars o aws configure
 #   3. Extrae outputs de Terraform
 #   4. Login a ECR
-#   5. Build + push de imágenes (orders, notifications)
+#   5. Build + push de imágenes (notifications, inventories, reservations)
 #   6. force-new-deployment en ECS
 #
 # Uso:
@@ -39,7 +39,7 @@ TF_DIR="$PROJECT_ROOT/terraform/option-b-ecs"
 # -------- Servicios a desplegar --------
 # Debe coincidir con los repos definidos en ecr.tf y los servicios en ecs.tf.
 # (NAT se levanta solo con la imagen pública nats:2.10-alpine, no necesita build/push.)
-SERVICES=(orders notifications inventories reservations)
+SERVICES=(notifications inventories reservations)
 
 # =========================================================
 # Paso 1 — Pre-flight checks
@@ -86,7 +86,7 @@ CLUSTER_NAME="$(terraform output -raw cluster_name)"
 popd >/dev/null
 
 # ECR_REGISTRY = todo hasta el primer "/" (ej: "123.dkr.ecr.us-east-1.amazonaws.com")
-ECR_REGISTRY="${ECR_URLS[orders]%%/*}"
+ECR_REGISTRY="${ECR_URLS[reservations]%%/*}"
 AWS_REGION="$(echo "$ECR_REGISTRY" | awk -F'.' '{print $4}')"
 [[ -n "$AWS_REGION" ]] || AWS_REGION="$(aws configure get region || echo us-east-1)"
 
@@ -158,14 +158,11 @@ URL pública:
   http://${ALB_DNS_NAME}
 
 Probar la API:
-  curl -X POST http://${ALB_DNS_NAME}/orders \\
-    -H "Content-Type: application/json" \\
-    -d '{"customer":"ana","total":120}'
-
-  curl http://${ALB_DNS_NAME}/orders/status/ana
+  curl -X POST http://${ALB_DNS_NAME}/reservations \
+    -H "Content-Type: application/json" \
+    -d '{"hotelId":1}'
 
 Ver logs en vivo:
-  aws logs tail /ecs/test-nest/orders --follow --region ${AWS_REGION}
   aws logs tail /ecs/test-nest/notifications --follow --region ${AWS_REGION}
   aws logs tail /ecs/test-nest/inventories --follow --region ${AWS_REGION}
   aws logs tail /ecs/test-nest/reservations --follow --region ${AWS_REGION}

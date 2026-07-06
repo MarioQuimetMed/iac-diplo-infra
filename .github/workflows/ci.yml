@@ -34,9 +34,6 @@ jobs:
       - name: Lint
         run: npm run lint:check
 
-      - name: Build orders
-        run: npm run build:orders
-
       - name: Build notifications
         run: npm run build:notifications
 
