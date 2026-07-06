@@ -162,11 +162,10 @@ jobs:
             -var="db_user=${{ secrets.DB_USER }}" \
             -var="db_password=${{ secrets.DB_PASSWORD }}" \
             -var="db_name=${{ secrets.DB_NAME }}" \
-
             -target=aws_ecr_repository.notifications \
             -target=aws_ecr_repository.inventories \
             -target=aws_ecr_repository.reservations
-
+            
       - name: Get ECR repository URLs
         id: ecr
         working-directory: ${{ env.TF_WORKING_DIR }}
