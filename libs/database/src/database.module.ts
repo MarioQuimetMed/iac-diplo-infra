@@ -14,7 +14,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         password: configService.get<string>('DB_PASSWORD') || 'postgres',
         database: configService.get<string>('DB_NAME') || 'reservations_db',
         autoLoadEntities: true,
-        // ssl: { rejectUnauthorized: false },
+        ssl: { rejectUnauthorized: false },
         synchronize:
           configService.get<string>('DB_SYNCHRONIZE') === 'true' ||
           configService.get<string>('NODE_ENV') !== 'production',
