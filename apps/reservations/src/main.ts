@@ -7,6 +7,7 @@ import { DEFAULT_NATS_URL } from '@app/contracts';
 async function bootstrap() {
   // 1. Crear la aplicación base HTTP
   const app = await NestFactory.create(ReservationsModule);
+  app.enableCors(); // Habilita CORS para el frontend
 
   // 2. Configurar validaciones globales para los DTOs
   app.useGlobalPipes(new ValidationPipe({ whitelist: true }));

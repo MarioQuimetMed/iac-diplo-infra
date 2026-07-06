@@ -5,6 +5,7 @@ import { DEFAULT_NATS_URL } from '@app/contracts';
 
 async function bootstrap() {
   const app = await NestFactory.create(InventoriesModule);
+  app.enableCors(); // Habilita CORS para el frontend
 
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.NATS,
