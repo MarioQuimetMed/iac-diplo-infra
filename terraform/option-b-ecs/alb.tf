@@ -52,7 +52,7 @@ resource "aws_lb_listener_rule" "reservations" {
 
   condition {
     path_pattern {
-      values = ["/reservations/*"]
+      values = ["/reservations", "/reservations/*"]
     }
   }
 }
@@ -68,7 +68,7 @@ resource "aws_lb_listener_rule" "inventories" {
 
   condition {
     path_pattern {
-      values = ["/inventories/*"]
+      values = ["/inventories", "/inventories/*"]
     }
   }
 }
@@ -84,7 +84,7 @@ resource "aws_lb_listener_rule" "orders" {
 
   condition {
     path_pattern {
-      values = ["/orders/*"]
+      values = ["/orders", "/orders/*"]
     }
   }
 }
