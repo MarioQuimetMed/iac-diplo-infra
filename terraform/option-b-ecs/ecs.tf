@@ -194,7 +194,7 @@ resource "aws_ecs_task_definition" "inventories" {
     ]
     environment = [
       { name = "NATS_URL", value = local.nats_dns_url },
-      { name = "HTTP_PORT", value = "3000" },
+      { name = "PORT", value = "3000" },
       { name = "DATABASE_URL", value = local.postgres_url },
       { name = "DB_HOST", value = local.DB_HOST },
       { name = "DB_PORT", value = local.DB_PORT },
@@ -230,7 +230,7 @@ resource "aws_ecs_task_definition" "reservations" {
     ]
     environment = [
       { name = "NATS_URL", value = local.nats_dns_url },
-      { name = "HTTP_PORT", value = "3000" },
+      { name = "PORT", value = "3000" },
       { name = "DATABASE_URL", value = local.postgres_url },
       { name = "DB_HOST", value = local.DB_HOST },
       { name = "DB_PORT", value = local.DB_PORT },
