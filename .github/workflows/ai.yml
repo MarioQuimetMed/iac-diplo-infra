@@ -62,17 +62,15 @@ jobs:
           claude_args: '--model claude-sonnet-4-6 --dangerously-skip-permissions'
           prompt: |
             Sos un reviewer experto de NestJS, Terraform y CI/CD.
-            Revisá los cambios de este Pull Request y realiza lo siguiente:
+            Analiza los últimos cambios ejecutando `git diff HEAD~1 HEAD` en bash.
+            
+            ¡MUY IMPORTANTE!: NO utilices la herramienta o skill "review" ni intentes usar "gh". Estás en CI automatizado.
 
-            1. Deja un comentario GENERAL en el Pull Request resumiendo los cambios (mensaje bien corto y conciso , si no hay nada mal solo di "todo bien"), qué te parecen y si hay algún riesgo potencial. **SIEMPRE debes dejar este comentario general** para confirmar que completaste la revisión.
+            Realiza lo siguiente en tu respuesta final:
+            1. Un comentario GENERAL (MÁXIMO 2 oraciones) diciendo si todo está bien o qué riesgos hay.
+            2. Si encuentras errores, redacta comentarios INLINE cortos (ej: "archivo.ts línea X: error lógico").
 
-            2. Adicionalmente, si encuentras errores, deja comentarios INLINE en las líneas de código afectadas sobre:
-               - Bugs reales o errores lógicos.
-               - Problemas de seguridad (inyección, secretos, IAM, CORS, etc.).
-               - Inconsistencias con el resto del repo (naming, patrones).
-               - Simplificaciones obvias.
-
-            Reglas:
-              - SIEMPRE deja un comentario general en el PR, aunque el código esté perfecto.
-              - Para los comentarios inline, sé conciso. Un comentario por hallazgo, sin párrafos.
+            Reglas Críticas:
+              - Sé EXTREMADAMENTE conciso. NO escribas relleno, NO expliques tu razonamiento previo, NO saludes.
+              - Escribe solo la revisión directamente.
               - Respondé en español.
