@@ -38,7 +38,7 @@ concurrency:
 
 env:
   TF_WORKING_DIR: terraform/option-b-ecs
-  TF_STATE_KEY: test-nest/terraform.tfstate
+  TF_STATE_KEY: option-b-ecs/terraform.tfstate
   TF_LOCK_TABLE: test-nest-tflock
 
 jobs:
