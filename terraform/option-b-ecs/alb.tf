@@ -57,21 +57,21 @@ resource "aws_lb_listener_rule" "reservations" {
   }
 }
 
-# resource "aws_lb_listener_rule" "inventories" {
-#   listener_arn = aws_lb_listener.http.arn
-#   priority     = 300
+resource "aws_lb_listener_rule" "inventories" {
+  listener_arn = aws_lb_listener.http.arn
+  priority     = 300
 
-#   action {
-#     type             = "forward"
-#     target_group_arn = aws_lb_target_group.inventories.arn
-#   }
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.inventories.arn
+  }
 
-#   condition {
-#     path_pattern {
-#       values = ["/inventories", "/inventories/*"]
-#     }
-#   }
-# }
+  condition {
+    path_pattern {
+      values = ["/inventories", "/inventories/*"]
+    }
+  }
+}
 
 
 resource "aws_lb_target_group" "inventories" {
