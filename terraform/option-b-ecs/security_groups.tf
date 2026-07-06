@@ -131,7 +131,7 @@ resource "aws_security_group" "reservations" {
 
 resource "aws_security_group" "rds" {
   name        = "${var.project_name}-rds-sg"
-  description = "RDS PostgreSQL: 5432 desde inventories y reservations"
+  description = "RDS PostgreSQL: 5432 desde la VPC"
   vpc_id      = aws_vpc.main.id
 
   egress {
