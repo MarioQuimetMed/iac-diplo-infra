@@ -57,38 +57,38 @@ resource "aws_lb_listener_rule" "reservations" {
   }
 }
 
-resource "aws_lb_listener_rule" "inventories" {
-  listener_arn = aws_lb_listener.http.arn
-  priority     = 300
+# resource "aws_lb_listener_rule" "inventories" {
+#   listener_arn = aws_lb_listener.http.arn
+#   priority     = 300
 
-  action {
-    type             = "forward"
-    target_group_arn = aws_lb_target_group.inventories.arn
-  }
+#   action {
+#     type             = "forward"
+#     target_group_arn = aws_lb_target_group.inventories.arn
+#   }
 
-  condition {
-    path_pattern {
-      values = ["/inventories", "/inventories/*"]
-    }
-  }
-}
+#   condition {
+#     path_pattern {
+#       values = ["/inventories", "/inventories/*"]
+#     }
+#   }
+# }
 
 
-resource "aws_lb_target_group" "inventories" {
-  name        = "${var.project_name}-inventories-tg"
-  port        = 3000
-  protocol    = "HTTP"
-  target_type = "ip"
-  vpc_id      = aws_vpc.main.id
-
-  health_check {
-    path                = "/inventories/status/healthcheck"
-    healthy_threshold   = 2
-    unhealthy_threshold = 3
-    interval            = 15
-    timeout             = 5
-    matcher             = "200-404" # NestJS devuelve 404 si la ruta no existe, lo que indicará que el server está vivo
-  }
-
-  deregistration_delay = 10
-}
+# resource "aws_lb_target_group" "inventories" {
+#   name        = "${var.project_name}-inventories-tg"
+#   port        = 3000
+#   protocol    = "HTTP"
+#   target_type = "ip"
+#   vpc_id      = aws_vpc.main.id
+# 
+#   health_check {
+#     path                = "/inventories/status/healthcheck"
+#     healthy_threshold   = 2
+#     unhealthy_threshold = 3
+#     interval            = 15
+#     timeout             = 5
+#     matcher             = "200-404" # NestJS devuelve 404 si la ruta no existe, lo que indicará que el server está vivo
+#   }
+# 
+#   deregistration_delay = 10
+# }
