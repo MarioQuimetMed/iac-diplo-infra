@@ -64,11 +64,6 @@ variable "azs" {
   default     = ["us-east-1a", "us-east-1b"]
 }
 
-variable "orders_desired_count" {
-  description = "Número de tareas Fargate para orders."
-  type        = number
-  default     = 1
-}
 
 variable "notifications_desired_count" {
   description = "Número de tareas Fargate para notifications."
@@ -106,8 +101,3 @@ variable "image_tag" {
   default     = "latest"
 }
 
-variable "redis_node_type" {
-  description = "Tipo de nodo ElastiCache para Redis."
-  type        = string
-  default     = "cache.t3.micro"
-}

@@ -3,10 +3,6 @@ output "alb_dns_name" {
   value       = aws_lb.main.dns_name
 }
 
-output "ecr_orders_repository_url" {
-  description = "URL del repo ECR para orders."
-  value       = aws_ecr_repository.orders.repository_url
-}
 
 output "ecr_notifications_repository_url" {
   description = "URL del repo ECR para notifications."
@@ -28,10 +24,6 @@ output "service_discovery_namespace" {
   value       = aws_service_discovery_private_dns_namespace.main.name
 }
 
-output "redis_endpoint" {
-  description = "Host:puerto del nodo ElastiCache Redis."
-  value       = "${aws_elasticache_cluster.redis.cache_nodes[0].address}:${aws_elasticache_cluster.redis.cache_nodes[0].port}"
-}
 
 output "ecr_inventories_repository_url" {
   description = "URL del repo ECR para inventories."

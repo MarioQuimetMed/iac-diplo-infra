@@ -7,12 +7,10 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build --all",
-    "build:orders": "nest build orders",
     "build:notifications": "nest build notifications",
     "build:reservations": "nest build reservations",
     "build:inventories": "nest build inventories",
     "format": "prettier --write \"apps/**/*.ts\" \"test/**/*.ts\"",
-    "start:orders": "nest start orders --watch",
     "start:notifications": "nest start notifications --watch",
     "start:reservations": "nest start reservations --watch",
     "start:inventories": "nest start inventories --watch",
@@ -70,9 +68,9 @@
       "ts"
     ],
     "testPathIgnorePatterns": [
-    "/node_modules/",
-    "<rootDir>/apps/.*/test/",
-    "<rootDir>/test/"
+      "/node_modules/",
+      "<rootDir>/apps/.*/test/",
+      "<rootDir>/test/"
     ],
     "rootDir": ".",
     "testRegex": ".*\\.spec\\.ts$",
