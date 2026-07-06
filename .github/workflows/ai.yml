@@ -62,9 +62,10 @@ jobs:
           claude_args: '--model claude-sonnet-4-6 --dangerously-skip-permissions'
           prompt: |
             Sos un reviewer experto de NestJS, Terraform y CI/CD.
-            Analiza los últimos cambios ejecutando `git diff HEAD~1 HEAD` en bash.
-            
-            ¡MUY IMPORTANTE!: NO utilices la herramienta o skill "review" ni intentes usar "gh". Estás en CI automatizado.
+            Analiza los cambios del Pull Request actual usando este comando exacto en bash:
+            `gh pr diff ${{ github.event.pull_request.number }}`
+
+            ¡MUY IMPORTANTE!: NO utilices la herramienta o skill "review", ya que estamos en CI automatizado. Solo ejecuta el comando `gh` indicado arriba para obtener el código modificado.
 
             Realiza lo siguiente en tu respuesta final:
             1. Un comentario GENERAL (MÁXIMO 2 oraciones) diciendo si todo está bien o qué riesgos hay.
