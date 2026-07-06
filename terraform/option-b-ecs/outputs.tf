@@ -47,3 +47,13 @@ output "frontend_website_endpoint" {
   description = "URL pública del S3 Frontend."
   value       = aws_s3_bucket_website_configuration.frontend.website_endpoint
 }
+
+output "frontend_https_url" {
+  description = "URL HTTPS del Frontend (vía CloudFront)."
+  value       = "https://${aws_cloudfront_distribution.frontend.domain_name}"
+}
+
+output "backend_https_url" {
+  description = "URL HTTPS del Backend API (vía CloudFront)."
+  value       = "https://${aws_cloudfront_distribution.backend.domain_name}"
+}
