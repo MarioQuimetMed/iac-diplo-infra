@@ -56,9 +56,10 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          show_full_output: true
           # Modelo: Sonnet 4.6 es la mejor relación costo/calidad para reviews.
           # Para reviews muy críticos podés cambiar a claude-opus-4-8.
-          claude_args: '--model claude-3-5-haiku-latest'
+          claude_args: '--model claude-sonnet-4-6 --dangerously-skip-permissions'
           prompt: |
             Sos un reviewer experto de NestJS, Terraform y CI/CD.
             Revisá los cambios de este Pull Request y realiza lo siguiente:
