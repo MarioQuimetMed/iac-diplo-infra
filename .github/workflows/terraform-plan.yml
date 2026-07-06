@@ -1,0 +1,163 @@
+# Terraform Plan — corre en PRs que tocan infra y postea el plan como comentario.
+# Solo se dispara cuando el PR modifica algo en terraform/ (o este workflow).
+# Para PRs solo-código no aporta — la infra no cambia.
+
+name: Terraform Plan
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'terraform/**'
+      - '.github/workflows/terraform-plan.yml'
+
+concurrency:
+  group: tf-plan-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  TF_WORKING_DIR: terraform/option-b-ecs
+  TF_STATE_KEY: option-b-ecs/terraform.tfstate
+  TF_LOCK_TABLE: test-nest-tflock
+
+jobs:
+  plan:
+    name: terraform plan
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      pull-requests: write
+
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.8
+          terraform_wrapper: false
+
+      - name: Terraform init
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: |
+          terraform init -input=false \
+            -backend-config="bucket=${{ vars.TF_STATE_BUCKET }}" \
+            -backend-config="key=${TF_STATE_KEY}" \
+            -backend-config="region=${{ vars.AWS_REGION }}" \
+            -backend-config="dynamodb_table=${TF_LOCK_TABLE}" \
+            -backend-config="encrypt=true"
+
+      - name: Terraform fmt check
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform fmt -check -recursive
+        continue-on-error: true
+        id: fmt
+
+      - name: Terraform validate
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        run: terraform validate -no-color
+        id: validate
+
+      - name: Terraform plan
+        working-directory: ${{ env.TF_WORKING_DIR }}
+        id: plan
+        run: |
+          set +e
+          terraform plan -input=false -no-color -lock-timeout=5m \
+            -var="image_tag=${{ github.event.pull_request.head.sha }}" \
+            -var="aws_region=${{ vars.AWS_REGION }}" \
+            -var="db_user=${{ secrets.DB_USER }}" \
+            -var="db_password=${{ secrets.DB_PASSWORD }}" \
+            -var="db_name=${{ secrets.DB_NAME }}" \
+            -out=tfplan.bin 2>&1 | tee plan_output.txt
+          EXIT=${PIPESTATUS[0]}
+          echo "exitcode=$EXIT" >> "$GITHUB_OUTPUT"
+          exit $EXIT
+
+      - name: Post plan as PR comment
+        if: always()
+        uses: actions/github-script@v7
+        env:
+          PLAN_FMT: ${{ steps.fmt.outcome }}
+          PLAN_VALIDATE: ${{ steps.validate.outcome }}
+          PLAN_RESULT: ${{ steps.plan.outcome }}
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            const planPath = path.join('${{ env.TF_WORKING_DIR }}', 'plan_output.txt');
+            let plan = '';
+            try {
+              plan = fs.readFileSync(planPath, 'utf8');
+            } catch (e) {
+              plan = '(no se pudo leer la salida del plan)';
+            }
+
+            // GitHub limita los comentarios a ~65k chars. Truncamos del medio.
+            const MAX = 60000;
+            if (plan.length > MAX) {
+              const half = Math.floor(MAX / 2);
+              plan = plan.slice(0, half) +
+                '\n\n... (truncado, ver logs del workflow para el plan completo) ...\n\n' +
+                plan.slice(-half);
+            }
+
+            const icon = (s) => s === 'success' ? '✅' : s === 'failure' ? '❌' : '⚠️';
+
+            const body = [
+              '### Terraform Plan',
+              '',
+              `- ${icon(process.env.PLAN_FMT)} \`terraform fmt\``,
+              `- ${icon(process.env.PLAN_VALIDATE)} \`terraform validate\``,
+              `- ${icon(process.env.PLAN_RESULT)} \`terraform plan\``,
+              '',
+              '<details><summary>Plan output</summary>',
+              '',
+              '```hcl',
+              plan,
+              '```',
+              '',
+              '</details>',
+              '',
+              `*Commit: \`${context.payload.pull_request.head.sha.slice(0, 7)}\`*`,
+            ].join('\n');
+
+            const marker = '<!-- terraform-plan-comment -->';
+            const fullBody = marker + '\n' + body;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find((c) => c.body && c.body.includes(marker));
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body: fullBody,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: fullBody,
+              });
+            }
