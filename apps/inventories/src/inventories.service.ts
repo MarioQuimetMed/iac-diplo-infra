@@ -40,7 +40,6 @@ export class InventoriesService {
     const checkIn = new Date(checkInDate);
     const checkOut = new Date(checkOutDate);
 
-    // Verify room exists
     const room = await this.roomRepo.findOne({ where: { id: roomId } });
     if (!room) {
       this.logger.warn(
@@ -50,7 +49,6 @@ export class InventoriesService {
       return;
     }
 
-    // Check overlap
     const overlappingBlock = await this.roomBlockRepo
       .createQueryBuilder('block')
       .where('block.roomId = :roomId', { roomId })
