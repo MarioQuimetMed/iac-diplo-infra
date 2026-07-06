@@ -133,6 +133,14 @@ resource "aws_security_group" "inventories" {
   description = "inventories: no acepta entrante (conecta a DB y NATS)"
   vpc_id      = aws_vpc.main.id
 
+  ingress {
+    description     = "HTTP desde ALB"
+    from_port       = 3000
+    to_port         = 3000
+    protocol        = "tcp"
+    security_groups = [aws_security_group.alb.id]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
