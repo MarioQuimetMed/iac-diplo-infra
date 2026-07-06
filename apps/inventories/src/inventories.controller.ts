@@ -1,4 +1,4 @@
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Get } from '@nestjs/common';
 import { EventPattern, Payload } from '@nestjs/microservices';
 import { InventoriesService } from './inventories.service';
 import { RESERVATION_REQUESTED_EVENT, ReservationRequestedEvent } from '@app/contracts';
@@ -11,6 +11,11 @@ export class InventoriesController {
   @Post('rooms')
   async createRoom(@Body() createRoomDto: CreateRoomDto) {
     return this.inventoriesService.createRoom(createRoomDto);
+  }
+
+  @Get('rooms')
+  async findAllRooms(this: InventoriesController) {
+    return this.inventoriesService.findAllRooms();
   }
 
   @EventPattern(RESERVATION_REQUESTED_EVENT)

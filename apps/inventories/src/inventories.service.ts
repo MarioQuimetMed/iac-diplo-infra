@@ -30,6 +30,11 @@ export class InventoriesService {
     return await this.roomRepo.save(room);
   }
 
+  async findAllRooms() {
+    this.logger.log(`Fetching all rooms...`);
+    return await this.roomRepo.find();
+  }
+
   async handleReservationRequested(payload: ReservationRequestedEvent) {
     this.logger.log(`Processing reservation requested event for reservation ${payload.reservationId}`);
     
