@@ -262,9 +262,17 @@ resource "aws_ecs_service" "inventories" {
     assign_public_ip = true
   }
 
+  load_balancer {
+    target_group_arn = aws_lb_target_group.inventories.arn
+    container_name   = "inventories"
+    container_port   = 3000
+  }
+
   service_registries {
     registry_arn = aws_service_discovery_service.inventories.arn
   }
+
+  depends_on = [aws_lb_listener.http]
 }
 
 resource "aws_ecs_service" "reservations" {
@@ -280,7 +288,15 @@ resource "aws_ecs_service" "reservations" {
     assign_public_ip = true
   }
 
+  load_balancer {
+    target_group_arn = aws_lb_target_group.reservations.arn
+    container_name   = "reservations"
+    container_port   = 3000
+  }
+
   service_registries {
     registry_arn = aws_service_discovery_service.reservations.arn
   }
+
+  depends_on = [aws_lb_listener.http]
 }
