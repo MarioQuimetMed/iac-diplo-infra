@@ -15,10 +15,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         database: configService.get<string>('DB_NAME') || 'reservations_db',
         autoLoadEntities: true,
         ssl: { rejectUnauthorized: false },
-        synchronize: configService.get<string>('NODE_ENV') !== 'production',
+        synchronize: configService.get<string>('DB_SYNCHRONIZE') === 'true' || configService.get<string>('NODE_ENV') !== 'production',
       }),
       inject: [ConfigService],
     }),
   ],
 })
-export class DatabaseModule {}
+export class DatabaseModule { }

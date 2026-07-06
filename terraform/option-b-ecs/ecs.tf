@@ -19,7 +19,7 @@ locals {
 
   nats_dns_url = "nats://nats.${aws_service_discovery_private_dns_namespace.main.name}:4222"
   redis_url    = "redis://${aws_elasticache_cluster.redis.cache_nodes[0].address}:${aws_elasticache_cluster.redis.cache_nodes[0].port}"
-  
+
   # endpoint ya incluye :5432, no duplicar el puerto
   postgres_url = "postgres://${var.db_user}:${var.db_password}@${aws_db_instance.hotel.endpoint}/${var.db_name}"
 
@@ -201,6 +201,7 @@ resource "aws_ecs_task_definition" "inventories" {
       { name = "DB_NAME", value = local.DB_NAME },
       { name = "DB_USERNAME", value = local.DB_USERNAME },
       { name = "DB_PASSWORD", value = local.DB_PASSWORD },
+      { name = "DB_SYNCHRONIZE", value = "true" },
     ]
     logConfiguration = {
       logDriver = "awslogs"
@@ -237,6 +238,7 @@ resource "aws_ecs_task_definition" "reservations" {
       { name = "DB_NAME", value = local.DB_NAME },
       { name = "DB_USERNAME", value = local.DB_USERNAME },
       { name = "DB_PASSWORD", value = local.DB_PASSWORD },
+      { name = "DB_SYNCHRONIZE", value = "true" },
     ]
     logConfiguration = {
       logDriver = "awslogs"
